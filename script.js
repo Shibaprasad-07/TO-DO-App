@@ -2,6 +2,20 @@ let tasks = [];
 let taskId = 1;
 let currentFilter = 'all';
 
+// Load tasks from localStorage
+function loadTasks() {
+    const saved = localStorage.getItem('todos');
+    if (saved) {
+        tasks = JSON.parse(saved);
+        taskId = Math.max(...tasks.map(t => t.id), 0) + 1;
+    }
+}
+
+// Save tasks to localStorage
+function saveTasks() {
+    localStorage.setItem('todos', JSON.stringify(tasks));
+}
+
 // DOM elements
 const taskInput = document.getElementById('taskInput');
 const addBtn = document.getElementById('addBtn');
@@ -13,6 +27,10 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+    renderTasks();
+    updateStats();
+    
     addBtn.addEventListener('click', addTask);
     taskInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addTask();
@@ -41,6 +59,7 @@ function addTask() {
     tasks.push(task);
     taskInput.value = '';
     
+    saveTasks();
     renderTasks();
     updateStats();
 }
@@ -49,6 +68,7 @@ function toggleTask(id) {
     const task = tasks.find(t => t.id === id);
     if (task) {
         task.completed = !task.completed;
+        saveTasks();
         renderTasks();
         updateStats();
     }
@@ -56,6 +76,7 @@ function toggleTask(id) {
 
 function deleteTask(id) {
     tasks = tasks.filter(t => t.id !== id);
+    saveTasks();
     renderTasks();
     updateStats();
 }
@@ -66,6 +87,7 @@ function editTask(id) {
         const newText = prompt('Edit your task:', task.text);
         if (newText && newText.trim()) {
             task.text = newText.trim();
+            saveTasks();
             renderTasks();
         }
     }
